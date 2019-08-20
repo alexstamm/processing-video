@@ -91,8 +91,8 @@ public class Capture extends PImage implements PConstants {
   protected Method sinkSetMethod;
   protected Method sinkDisposeMethod;
   protected Method sinkGetMethod;
-  
   protected String device;
+  protected String pipelineStr;
   protected static List<Device> devices;    // we're caching this list for speed reasons
 
   NewSampleListener newSampleListener;
@@ -113,11 +113,25 @@ public class Capture extends PImage implements PConstants {
    *  @param parent PApplet, typically "this"
    *  @param device device name
    *  @see Capture#list()
-   *  @see Capture#listRawNames()
    */
   public Capture(PApplet parent, String device) {
     // attemt to use a default resolution
     this(parent, 640, 480, device, 0);
+  }
+  
+  /**
+   *  Open a specific capture device
+   *  @param parent PApplet, typically "this"
+   *  @param device String
+   *  @param pipeline String
+   *  @see Capture#list()
+   */
+  public Capture(PApplet parent, String device, String pipeline) {
+    // attemt to use a default resolution
+	  super(640, 480, RGB);
+	  this.device = device;
+	  pipelineStr = pipeline;
+      initGStreamer(parent);
   }
 
   /**
@@ -688,7 +702,31 @@ public class Capture extends PImage implements PConstants {
                   target, targetX, targetY);
   }
 
-
+protected Element[] parseDescription(String desc, AppSink sink) {
+	Element[] elements = new Element[2];
+	
+	
+	int index = desc.indexOf("!");
+	String tempElement = desc.substring(0, index - 1).trim();
+	elements[0] = ElementFactory.make(tempElement, null);
+	
+	while (index != -1) {
+		tempElement = desc.substring(index + 1, desc.length()).trim();
+		elements[index] = ElementFactory.make(tempElement, null);
+	}
+	
+	
+	
+	
+	//elements[0] = ElementFactory.make(tempElement, null);
+	
+	
+	//elements[2] = sink;
+	
+	
+	return elements;
+}
+  
   ////////////////////////////////////////////////////////////
 
   // Initialization methods.
@@ -699,6 +737,7 @@ public class Capture extends PImage implements PConstants {
     pipeline = null;
 
     Video.init();
+
 
 
     Element srcElement = null;
@@ -763,8 +802,20 @@ public class Capture extends PImage implements PConstants {
       rgbSink.setCaps(Caps.fromString("video/x-raw, format=xRGB"));
     }
     
-    pipeline.addMany(srcElement, videoscale, videoconvert, capsfilter, rgbSink);
-    Pipeline.linkMany(srcElement, videoscale, videoconvert, capsfilter, rgbSink);
+    
+    if(pipelineStr != null) {
+    	Element[] elements = parseDescription(pipelineStr, rgbSink);
+    	
+    	//Gst.parse
+    	
+    	pipeline.addMany(elements);
+    	Pipeline.linkMany(elements);
+    }
+    else {
+        pipeline.addMany(srcElement, videoscale, videoconvert, capsfilter, rgbSink);
+        Pipeline.linkMany(srcElement, videoscale, videoconvert, capsfilter, rgbSink);
+    }
+
 
     makeBusConnections(pipeline.getBus());
 
