@@ -7,10 +7,10 @@ This library comprises classes for movie playback and video capture. It is based
 
 Updates to this library include:
 
-Updated GStreamer modules, gst1-java-core, and JNA
-Updated LibraryLoader to incorporate new GStreamer .dlls
-Utilizing native buffer
-Improved camera capture functionality
-Multicamera support, allows cameras of the same name to be used
-Improved frame scrubbing
-Info display for bundled vs system GStreamer installs
+- Updated GStreamer modules, gst1-java-core, and JNA
+- Updated LibraryLoader to incorporate new GStreamer .dlls
+- Utilizing native buffer
+- Improved camera capture functionality
+- Multicamera support, allows cameras of the same name to be used
+- Improved frame scrubbing
+- Info display for bundled vs system GStreamer installs
